@@ -6,15 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "playwright": "playwright install --with-deps"
+    "lint": "next lint"
   },
   "dependencies": {
-    "cheerio": "^1.1.0",
     "firebase": "^11.10.0",
-    "firebase-admin": "^13.4.0",
     "next": "15.3.5",
-    "playwright-core": "^1.53.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
