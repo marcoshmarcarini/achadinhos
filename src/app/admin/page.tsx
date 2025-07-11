@@ -1,3 +1,4 @@
+import AccessToken from "@/components/Admin/AccessToken/page";
 import Form from "@/components/Admin/Form/page";
 import Table from "@/components/Admin/Table/page";
 
@@ -7,6 +8,7 @@ export default function Admin() {
       <h1>Admin</h1>
       <Form />
       <Table />
+      <AccessToken />
     </div>
   );
 }
