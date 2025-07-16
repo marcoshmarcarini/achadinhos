@@ -3,3 +3,79 @@
     width: 100%;
     margin: 0 auto;
 }
+
+.trow{
+    height: 200px;
+    overflow-y: hidden;
+}
+
+.tdata{
+    height: 200px;
+    overflow-y: hidden;
+}
+
+.data_Image{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 10px;
+}
+
+.image{
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}
+
+.title{
+    font-size: 0.8rem;
+    text-align: justify;
+    width: 200px;
+}
+
+.price{
+    font-size: 1.2rem;
+    color: oklch(70.4% 0.04 256.788);
+    font-weight: 800;
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.discount{
+    font-size: 1.2rem;
+    color: oklch(70.4% 0.04 256.788);
+    font-weight: 800;
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tdata_description{
+    padding: 0;
+}
+
+.description{
+    height: 150px;
+    overflow-y: scroll;
+    padding: 0 10px;
+    text-align: justify;
+    font-size: 0.8rem;
+}
+
+.description::-webkit-scrollbar-track {
+    background-color: transparent;
+
+}
+
+.description::-webkit-scrollbar-thumb {
+    background-color: oklch(70.4% 0.04 256.788);
+}
+
+.description::-webkit-scrollbar {
+    width: 5px;
+}

@@ -1,0 +1,49 @@
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.text{
+    font-size: 0.7rem;
+    text-align: center;
+    text-wrap: wrap;
+    max-width: 600px;
+    width: 100%;
+    font-weight: 400;
+}
+
+.buttonLogout{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: #e72323;
+    color: #fff;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+    padding: 5px 15px;
+    border: 1px solid transparent;
+    transition: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.buttonLogin{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: #1ec71e;
+    color: #fff;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+    padding: 5px 15px;
+    border: 1px solid transparent;
+    transition: 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}

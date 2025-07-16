@@ -45,22 +45,22 @@ export default function Table() {
         className={`rounded-sm text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400`}
       >
         <tr>
-          <th scope="col" className={`px-6 py-3`}>
-            Imagem
+          <th scope="col" className={`px-6 py-3 text-center`}>
+            Produto
           </th>
-          <th scope="col" className={`px-6 py-3`}>
+          <th scope="col" className={`px-6 py-3 text-center`}>
             Título
           </th>
-          <th scope="col" className={`px-6 py-3`}>
+          <th scope="col" className={`px-6 py-3 text-center`}>
             Preço
           </th>
-          <th scope="col" className={`px-6 py-3`}>
+          <th scope="col" className={`px-6 py-3 text-center`}>
             Desconto
           </th>
-          <th scope="col" className={`px-6 py-3`}>
+          <th scope="col" className={`px-6 py-3 text-center`}>
             Descrição
           </th>
-          <th scope="col" className={`px-6 py-3`}>
+          <th scope="col" className={`px-6 py-3 text-center`}>
             Link da Oferta
           </th>
         </tr>
@@ -71,8 +71,9 @@ export default function Table() {
             <tr
               key={id}
               className={`${styles.trow} bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200`}
+              style={{ height:'200px', overflowY: "hidden" }}
             >
-              <td className={`${styles.tdata} px-6 py-4`}>
+              <td className={`${styles.tdata_Image} px-2 w-[100px]`}>
                 <Image
                   src={
                     offer.imageUrl
@@ -82,16 +83,24 @@ export default function Table() {
                   alt={offer.title}
                   width={150}
                   height={150}
+                  className={styles.image}
                 />
               </td>
-              <td className={`${styles.tdata} px-6 py-4`}>{offer.title}</td>
               <td className={`${styles.tdata} px-6 py-4`}>
-                R${offer.price ? offer.price.toFixed(2).replace(".", ",") : 0}
+                <p className={styles.title}>{offer.title}</p>
+                </td>
+              <td className={`${styles.tdata} px-2 py-4`}>
+                <p className={styles.price}>
+                  R${offer.price ? offer.price.toFixed(2).replace(".", ",") : 0}
+                </p>
               </td>
-              <td className={`${styles.tdata} px-6 py-4`}>
-                <span>{offer.discount } %</span>
+              <td className={`${styles.tdata} px-2 py-4`}>
+                <span className={styles.discount}>{offer.discount} %</span>
               </td>
-              <td className={styles.tdata_description}>{offer.description}</td>
+              <td
+                className={`${styles.tdata_description} `}>
+                <p className={styles.description}>{offer.description}</p>
+              </td>
               <td className={`${styles.tdata} px-6 py-4`}>
                 <Link
                   href={offer.offerLink ? offer.offerLink : "#"}
