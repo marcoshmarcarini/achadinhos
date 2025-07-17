@@ -1,8 +1,8 @@
-html:root{
+/* {
     --orange-400: oklch(75% 0.183 55.934);
     --orange-500: oklch(70.5% 0.213 47.604);
     --orange-950: oklch(26.6% 0.079 36.259);
-}
+} */
 
 .menu_principal{
     display: flex;
@@ -10,7 +10,7 @@ html:root{
     align-items: center;
     padding: 10px 20px;
     height: 60px;
-    background-color: var(--orange-400);
+    background-color: oklch(75% 0.183 55.934);
 }
 
 .menu_content{
@@ -35,7 +35,7 @@ html:root{
 }
 
 .menu_item:hover{
-    color: var(--orange-950);
+    color: oklch(26.6% 0.079 36.259);
     transition: 400ms ease;
 }
 
