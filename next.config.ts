@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'down-br.img.susercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cf.shopee.com.br',
+      },
     ],
   },
 };
