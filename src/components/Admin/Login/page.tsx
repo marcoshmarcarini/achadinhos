@@ -19,7 +19,7 @@ export default function Login() {
   return (
     <div className={styles.container}>
       <button
-        onClick={() => signIn("facebook", { callbackUrl: "/admin" })}
+        onClick={() => signIn("facebook", { callbackUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/admin` })}
         className={styles.buttonLogin}
       >
         Login
