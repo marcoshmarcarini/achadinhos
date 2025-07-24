@@ -1,5 +1,6 @@
+// src/app/api/restricted.ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "./auth/[...nextauth]/route";
+import { authOptions } from "./auth/authOptions";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SessionStrategy } from "next-auth";
 
@@ -8,18 +9,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     ...authOptions,
     session: {
       ...authOptions.session,
-      strategy: authOptions.session.strategy as SessionStrategy,
+      strategy: authOptions.session?.strategy as SessionStrategy,
     },
   });
 
   if (session) {
     res.send({
       content:
-        "Este é um conteúdo protegido. Vocé pode acessar o conteúdo, porque está logado.",
+        "Este é um conteúdo protegido. Você pode acessar o conteúdo, porque está logado.",
     });
   } else {
     res.send({
-      error: "Vocé deve estar logado para verificar o conteúdo protegido.",
+      error: "Você deve estar logado para verificar o conteúdo protegido.",
     });
   }
 };
