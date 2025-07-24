@@ -16,6 +16,7 @@ enum SessionStrategy {
   JWT = "jwt",
 }
 
+
 export const authOptions: NextAuthOptions = {
   providers: [
     FacebookProvider({
@@ -47,8 +48,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET!,
+  secret: `${process.env.NEXTAUTH_SECRET}`,
   pages: {
-    signIn: "/admin",
+    signIn: `${process.env.NEXTAUTH_URL}/admin`,
   },
 };
