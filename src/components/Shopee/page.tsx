@@ -22,7 +22,7 @@ export default function Shopee() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await fetch("/api/shopee", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
