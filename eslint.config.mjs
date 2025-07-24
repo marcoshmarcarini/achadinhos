@@ -13,4 +13,12 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
 
-export default eslintConfig;
+const tseslint = tseslint.config({
+  rules: {
+    "@typescript-eslint/no-explicit-any": "error"
+  }
+});
+
+export default {eslintConfig, tseslint};
+
+
