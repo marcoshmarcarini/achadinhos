@@ -2,7 +2,7 @@ import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 
 export async function POST() {
   // Fetch as ofertas (você já tem isso pronto no seu projeto!)
-  const response = await fetch("/api/shopee", { method: "POST" });
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, { method: "POST" });
   const json = await response.json();
   const produtos = json?.data?.data?.productOfferV2?.nodes;
 
