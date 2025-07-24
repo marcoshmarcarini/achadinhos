@@ -1,6 +1,7 @@
 import FacebookProvider from "next-auth/providers/facebook";
 import { JWT } from "next-auth/jwt";
-import NextAuth, { Session } from "next-auth";
+import { Session, Account } from "next-auth";
+import NextAuth from "next-auth";
 
 interface ExtendedToken extends JWT {
   accessToken?: string;
@@ -14,9 +15,7 @@ enum SessionStrategy {
   JWT = "jwt",
 }
 
-
-
-export const authOptions = {
+const handler = NextAuth({
   providers: [
     FacebookProvider({
       clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID!,
@@ -34,13 +33,7 @@ export const authOptions = {
     strategy: SessionStrategy.JWT,
   },
   callbacks: {
-    async jwt({
-      token,
-      account,
-    }: {
-      token: JWT;
-      account: any;
-    }) {
+    async jwt({ token, account }: { token: JWT; account: Account | null }) {
       if (account?.access_token) {
         token.accessToken = account.access_token;
       }
@@ -52,20 +45,21 @@ export const authOptions = {
       token,
       user,
     }: {
-      session: ExtendedSession;
+      session: Session;
       token: JWT;
       user: unknown;
     }) {
-      session.accessToken = (token as ExtendedToken).accessToken;
+      (session as ExtendedSession).accessToken = (
+        token as ExtendedToken
+      ).accessToken;
       console.log(user);
-      return session as unknown as ExtendedSession;
+      return session as ExtendedSession;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/admin/login",
   },
-};
+});
 
-const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
