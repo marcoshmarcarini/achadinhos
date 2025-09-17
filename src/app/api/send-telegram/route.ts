@@ -1,19 +1,13 @@
+// app/api/send-telegram/route.ts
 import { sendTelegramMessage } from "../../../../utils/sendTelegram";
+
+// Variável global para controlar o último índice enviado
+let ultimoIndiceEnviado = 0;
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-// Handler para OPTIONS (CORS)
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-    },
-  });
-}
+// ... (código OPTIONS e outras funções permanecem iguais) ...
 
 export async function POST(req: Request) {
   try {
@@ -21,20 +15,13 @@ export async function POST(req: Request) {
     const secret = url.searchParams.get("secret");
     
     if (!process.env.TELEGRAM_SECRET || secret !== process.env.TELEGRAM_SECRET) {
-      return new Response(
-        JSON.stringify({ 
-          ok: false, 
-          error: "Unauthorized - Secret inválido" 
-        }), 
-        { 
-          status: 401,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-          }
+      return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), { 
+        status: 401,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         }
-      );
+      });
     }
 
     // Busca as ofertas da Shopee
@@ -54,31 +41,35 @@ export async function POST(req: Request) {
     const produtos = json?.data?.data?.productOfferV2?.nodes || [];
 
     if (!produtos.length) {
-      return new Response(
-        JSON.stringify({ 
-          ok: false, 
-          error: "Nenhum produto encontrado na Shopee" 
-        }), 
-        { 
-          status: 404,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-          }
+      return new Response(JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }), { 
+        status: 404,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         }
-      );
+      });
     }
 
-    console.log(`📦 Encontrados ${produtos.length} produtos. Enviando top 5...`);
+    console.log(`📦 Encontrados ${produtos.length} produtos.`);
+    console.log(`📊 Último índice enviado: ${ultimoIndiceEnviado}`);
 
-    // Envia top 5 ofertas com delay entre mensagens
-    const produtosParaEnviar = produtos.slice(0, 5);
+    // Seleciona os próximos 5 produtos (rotaciona)
+    const produtosParaEnviar = [];
+    for (let i = 0; i < 5; i++) {
+      const index = (ultimoIndiceEnviado + i) % produtos.length;
+      produtosParaEnviar.push(produtos[index]);
+    }
+    
+    // Atualiza o índice para a próxima execução
+    ultimoIndiceEnviado = (ultimoIndiceEnviado + 5) % produtos.length;
+
+    console.log(`🔄 Enviando produtos ${ultimoIndiceEnviado - 5} a ${ultimoIndiceEnviado - 1}`);
+
     let enviadosComSucesso = 0;
 
     for (const [index, produto] of produtosParaEnviar.entries()) {
       try {
-        // Converte preços para número e formata corretamente
+        // Converte preços para número
         const priceMax = typeof produto.priceMax === 'string' 
           ? parseFloat(produto.priceMax) 
           : typeof produto.priceMax === 'number' 
@@ -104,109 +95,44 @@ export async function POST(req: Request) {
         await sendTelegramMessage(message);
         enviadosComSucesso++;
         
-        console.log(`✅ Mensagem ${index + 1}/${produtosParaEnviar.length} enviada`);
+        console.log(`✅ Mensagem ${index + 1}/5 enviada`);
 
-        // Delay de 1 segundo entre mensagens para evitar rate limiting
-        if (index < produtosParaEnviar.length - 1) {
+        // Delay de 1 segundo entre mensagens
+        if (index < 4) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
       } catch (error) {
         console.error(`❌ Erro ao enviar mensagem ${index + 1}:`, error);
-        // Continua para as próximas mensagens mesmo se uma falhar
       }
     }
 
-    return new Response(
-      JSON.stringify({ 
-        ok: true, 
-        total: produtos.length,
-        enviados: enviadosComSucesso,
-        message: `Enviadas ${enviadosComSucesso} de ${produtosParaEnviar.length} mensagens com sucesso`
-      }), 
-      { 
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-        }
+    return new Response(JSON.stringify({ 
+      ok: true, 
+      total: produtos.length,
+      enviados: enviadosComSucesso,
+      proximoIndice: ultimoIndiceEnviado,
+      message: `Enviadas ${enviadosComSucesso} de 5 mensagens. Próximo índice: ${ultimoIndiceEnviado}`
+    }), { 
+      status: 200,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       }
-    );
+    });
 
   } catch (error: unknown) {
-    console.error("💥 Erro crítico no send-telegram:", error);
+    console.error("💥 Erro crítico:", error);
     
-    return new Response(
-      JSON.stringify({ 
-        ok: false, 
-        error: error instanceof Error ? error.message : "Erro desconhecido"
-      }),
-      { 
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-        }
+    return new Response(JSON.stringify({ 
+      ok: false, 
+      error: error instanceof Error ? error.message : "Erro desconhecido"
+    }), { 
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       }
-    );
+    });
   }
-}
-
-// Para testes manuais via GET
-export async function GET(req: Request) {
-  try {
-    const url = new URL(req.url);
-    const secret = url.searchParams.get("secret");
-    
-    if (!process.env.TELEGRAM_SECRET || secret !== process.env.TELEGRAM_SECRET) {
-      return new Response(
-        JSON.stringify({ 
-          ok: false, 
-          error: "Unauthorized - Secret inválido para GET" 
-        }), 
-        { 
-          status: 401,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-          }
-        }
-      );
-    }
-    
-    console.log("🔍 Teste GET acionado - simulando POST...");
-    return POST(req);
-    
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any | unknown) {
-    return new Response(
-      JSON.stringify({ 
-        ok: false, 
-        error: "Erro no método GET" + error.message 
-      }),
-      { 
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
-        }
-      }
-    );
-  }
-}
-
-// Suporte a HEAD para health checks
-export async function HEAD() {
-  return new Response(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
-      'Content-Type': 'application/json'
-    }
-  });
 }

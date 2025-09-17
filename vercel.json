@@ -23,7 +23,7 @@
   "crons": [
     {
       "path": "/api/send-telegram?secret=Xt5zDSbVilnpKVTuI5Xw9jkzS2Q9yoYb",
-      "schedule": "0 9 * * *"
+      "schedule": "*/2 * * * *"
     }
   ]
 }
