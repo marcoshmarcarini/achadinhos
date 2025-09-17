@@ -2,7 +2,8 @@
   "crons": [
     {
       "path": "/api/send-telegram",
-      "schedule": "0 * * * *"
+      "schedule": "0 * * * *",
+      "method": "POST"
     }
   ]
 }
