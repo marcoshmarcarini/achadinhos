@@ -18,6 +18,7 @@ interface ProdutoProps {
 }
 
 export default function Shopee() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [produtos, setProdutos] = useState<ProdutoProps[]>([]);
   const [topProdutos, setTopProdutos] = useState<ProdutoProps[]>([]);
 
