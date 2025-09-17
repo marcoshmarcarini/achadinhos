@@ -19,26 +19,27 @@ interface ProdutoProps {
 
 export default function Shopee() {
   const [produtos, setProdutos] = useState<ProdutoProps[]>([]);
+  const [topProdutos, setTopProdutos] = useState<ProdutoProps[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
       const json = await response.json();
-      console.log("✅ json:", json);
-
       const nodes = json?.data?.data?.productOfferV2?.nodes;
-      console.log("✅ nodes:", nodes);
 
       if (Array.isArray(nodes)) {
         setProdutos(nodes);
-      } else {
-        console.error("Formato de dados inválido", json);
+
+        // 👉 Ordena por maior desconto e pega os 10 primeiros
+        const top10 = [...nodes]
+          .sort((a, b) => b.priceDiscountRate - a.priceDiscountRate)
+          .slice(0, 10);
+
+        setTopProdutos(top10);
       }
     };
     fetchProducts();
@@ -46,9 +47,13 @@ export default function Shopee() {
 
   return (
     <div>
+      <h2 style={{ textAlign: "center", margin: "20px 0" }}>
+        🔥 Top 10 Ofertas de Hoje
+      </h2>
+
       <div className={styles.container}>
-        {produtos ? (
-          produtos.map((offer, id) => (
+        {topProdutos.length > 0 ? (
+          topProdutos.map((offer, id) => (
             <div key={id} className={styles.cardOffer}>
               <div className={styles.imageContainer}>
                 <Image
@@ -60,9 +65,7 @@ export default function Shopee() {
                   quality={100}
                 />
               </div>
-              <span
-                className={`${styles.discount} bg-orange-100 text-orange-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-orange-900 dark:text-orange-300`}
-              >
+              <span className={styles.discount}>
                 {offer.priceDiscountRate}%
               </span>
               <div className={styles.info_content}>
@@ -73,7 +76,7 @@ export default function Shopee() {
                   </p>
                 </div>
                 <div>
-                  <Link href={`${offer.offerLink}`} className={styles.button}>
+                  <Link href={offer.offerLink} className={styles.button}>
                     Comprar
                   </Link>
                 </div>
@@ -81,7 +84,7 @@ export default function Shopee() {
             </div>
           ))
         ) : (
-          <p>Carregando...</p>
+          <p>Carregando ofertas...</p>
         )}
       </div>
     </div>
