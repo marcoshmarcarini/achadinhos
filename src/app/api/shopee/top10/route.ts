@@ -28,7 +28,11 @@ export async function POST() {
     const mensagensTelegram = top10.map((p, index) => {
       return `🔥 Oferta #${index + 1}
 📌 ${p.productName}
-💰 De: R$${Number(p.priceMax).toFixed(2).replace(".", ",")}
+    ${
+      p.priceMax == p.priceMin
+        ? ""
+        : `💰 R$${Number(p.priceMax).toFixed(2).replace(".", ",")}`
+    }
 ➡️ Por: R$${Number(p.priceMin).toFixed(2).replace(".", ",")}
 ⭐ Avaliação: ${p.ratingStar} | 📦 Vendas: ${p.sales}
 🔗 ${p.offerLink}`;
