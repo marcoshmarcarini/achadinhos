@@ -1,20 +1,30 @@
 {
-  "crons": [
+  "version": 3,
+  "routes": [
     {
-      "path": "/api/send-telegram",
-      "schedule": "0 * * * *",
-      "method": "POST"
+      "src": "/api/(.*)",
+      "methods": ["GET", "POST", "OPTIONS", "HEAD", "PUT", "DELETE"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS, HEAD, PUT, DELETE",
+        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      }
     }
   ],
-  "headers": [
+  "functions": {
+    "app/api/send-telegram/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/shopee/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
-      ]
+      "path": "/api/send-telegram?secret=Xt5zDSbVilnpKVTuI5Xw9jkzS2Q9yoYb",
+      "schedule": "0 9 * * *",
+      "method": "POST"
     }
   ]
 }

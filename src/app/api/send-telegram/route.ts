@@ -1,10 +1,22 @@
 import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
+// Handler para OPTIONS (CORS)
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    },
+  });
+}
 
 export async function POST(req: Request) {
   try {
-    // 🔐 Segurança - verifica o secret personalizado
     const url = new URL(req.url);
     const secret = url.searchParams.get("secret");
     
@@ -16,7 +28,11 @@ export async function POST(req: Request) {
         }), 
         { 
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+          }
         }
       );
     }
@@ -37,19 +53,19 @@ export async function POST(req: Request) {
     const json = await shopeeResponse.json();
     const produtos = json?.data?.data?.productOfferV2?.nodes || [];
 
-    // DEBUG: Log para ver a estrutura dos dados
-    console.log('📊 Estrutura do primeiro produto:', JSON.stringify(produtos[0], null, 2));
-
     if (!produtos.length) {
       return new Response(
         JSON.stringify({ 
           ok: false, 
-          
           error: "Nenhum produto encontrado na Shopee" 
         }), 
         { 
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+          }
         }
       );
     }
@@ -97,8 +113,6 @@ export async function POST(req: Request) {
 
       } catch (error) {
         console.error(`❌ Erro ao enviar mensagem ${index + 1}:`, error);
-        // DEBUG: Log do produto que causou erro
-        console.log('❌ Produto com erro:', JSON.stringify(produto, null, 2));
         // Continua para as próximas mensagens mesmo se uma falhar
       }
     }
@@ -112,7 +126,11 @@ export async function POST(req: Request) {
       }), 
       { 
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+        }
       }
     );
 
@@ -122,12 +140,15 @@ export async function POST(req: Request) {
     return new Response(
       JSON.stringify({ 
         ok: false, 
-        error: error instanceof Error ? error.message : "Erro desconhecido",
-        stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
+        error: error instanceof Error ? error.message : "Erro desconhecido"
       }),
       { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+        }
       }
     );
   }
@@ -147,7 +168,11 @@ export async function GET(req: Request) {
         }), 
         { 
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+          }
         }
       );
     }
@@ -155,29 +180,33 @@ export async function GET(req: Request) {
     console.log("🔍 Teste GET acionado - simulando POST...");
     return POST(req);
     
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any | unknown) {
     return new Response(
       JSON.stringify({ 
         ok: false, 
-        error: "Erro no método GET" 
+        error: "Erro no método GET" + error.message 
       }),
       { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD'
+        }
       }
     );
   }
 }
 
-
-export async function OPTIONS() {
+// Suporte a HEAD para health checks
+export async function HEAD() {
   return new Response(null, {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
+      'Content-Type': 'application/json'
+    }
   });
 }

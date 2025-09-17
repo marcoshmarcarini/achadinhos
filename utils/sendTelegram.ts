@@ -13,8 +13,6 @@ export async function sendTelegramMessage(message: string): Promise<unknown> {
 
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     
-    console.log(`📤 Enviando mensagem para o chat: ${chatId}`);
-    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
