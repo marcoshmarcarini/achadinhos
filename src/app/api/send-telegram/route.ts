@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       return new Response(
         JSON.stringify({ 
           ok: false, 
+          
           error: "Nenhum produto encontrado na Shopee" 
         }), 
         { 
@@ -167,4 +168,16 @@ export async function GET(req: Request) {
       }
     );
   }
+}
+
+
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
