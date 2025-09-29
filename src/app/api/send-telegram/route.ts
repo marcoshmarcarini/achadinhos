@@ -75,10 +75,10 @@ export async function POST(req: Request) {
     }
 
     // Atualiza o índice para a próxima execução
-    ultimoIndiceEnviado = (ultimoIndiceEnviado + 5) % produtos.length;
+    ultimoIndiceEnviado = (ultimoIndiceEnviado + 20) % produtos.length;
 
     console.log(
-      `🔄 Enviando produtos ${ultimoIndiceEnviado - 5} a ${
+      `🔄 Enviando produtos ${ultimoIndiceEnviado - 20} a ${
         ultimoIndiceEnviado - 1
       }`
     );
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
         total: produtos.length,
         enviados: enviadosComSucesso,
         proximoIndice: ultimoIndiceEnviado,
-        message: `Enviadas ${enviadosComSucesso} de 5 mensagens. Próximo índice: ${ultimoIndiceEnviado}`,
+        message: `Enviadas ${enviadosComSucesso} de 20 mensagens. Próximo índice: ${ultimoIndiceEnviado}`,
       }),
       {
         status: 200,
