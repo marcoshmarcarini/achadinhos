@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
     // Seleciona os próximos 5 produtos (rotaciona)
     const produtosParaEnviar = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 20; i++) {
       const index = (ultimoIndiceEnviado + i) % produtos.length;
       produtosParaEnviar.push(produtos[index]);
     }
@@ -103,18 +103,19 @@ export async function POST(req: Request) {
             : 0;
 
         const message = `
-🛍️ <b>${produto.productName || "Produto sem nome"}</b>
-${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
-🔥 Por: <b>R$ ${priceMin.toFixed(2)}</b>
-⭐ Avaliação: ${produto.ratingStar || "0"} (${produto.sales || 0} vendas)
+        🔗 <a href="${produto.offerLink}">COMPRAR AGORA</a>
+        🛍️ <b>${produto.productName || "Produto sem nome"}</b>
+        ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
+        🔥 Por: <b>R$ ${priceMin.toFixed(2)}</b>
+        ⭐ Avaliação: ${produto.ratingStar || "0"} (${produto.sales || 0} vendas)
 
-🔗 <a href="${produto.offerLink}">COMPRAR AGORA</a>
+     
         `.trim();
 
         await sendTelegramMessage(message);
         enviadosComSucesso++;
 
-        console.log(`✅ Mensagem ${index + 1}/5 enviada`);
+        console.log(`✅ Mensagem ${index + 1}/20 enviada`);
 
         // Delay de 1 segundo entre mensagens
         if (index < 4) {
