@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SessionWrapper from "@/components/SessionWrapper/page";
-
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Nav from "@/components/Theme/Nav/page";
 
@@ -33,6 +33,7 @@ export default async function RootLayout({
         <SessionWrapper>
           <Nav />
           {children}
+          <Analytics />
         </SessionWrapper>
       </body>
     </html>
