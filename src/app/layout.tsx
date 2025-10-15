@@ -4,6 +4,7 @@ import SessionWrapper from "@/components/SessionWrapper/page";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Nav from "@/components/Theme/Nav/page";
+import Footer from "@/components/Theme/footer/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default async function RootLayout({
           <Nav />
           {children}
           <Analytics />
+          <Footer />
         </SessionWrapper>
       </body>
     </html>
