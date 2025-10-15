@@ -6,10 +6,10 @@ let ultimoIndiceEnviado = 0;
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
+// ✅ Função interna reutilizável para GET e POST
+async function processarEnvio(req: Request) {
   try {
-    // ✅ SE quiser manter a validação opcional por SECRET:
-    const secret = process.env.TELEGRAM_SECRET;
+    const secret = process.env.CRON_SECRET;
     const url = new URL(req.url);
     const providedSecret = url.searchParams.get("secret");
 
@@ -26,7 +26,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Buscar os produtos
     const shopeeResponse = await fetch(
       `${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`,
       {
@@ -136,4 +135,13 @@ ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
       }
     );
   }
+}
+
+// ✅ Handlers para GET e POST
+export async function GET(req: Request) {
+  return processarEnvio(req);
+}
+
+export async function POST(req: Request) {
+  return processarEnvio(req);
 }
