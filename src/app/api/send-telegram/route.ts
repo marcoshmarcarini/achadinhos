@@ -1,23 +1,19 @@
 // app/api/send-telegram/route.ts
 import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 
-// Variável global para controlar o último índice enviado
 let ultimoIndiceEnviado = 0;
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-// ... (código OPTIONS e outras funções permanecem iguais) ...
-
 export async function POST(req: Request) {
   try {
+    // ✅ SE quiser manter a validação opcional por SECRET:
+    const secret = process.env.TELEGRAM_SECRET;
     const url = new URL(req.url);
-    const secret = url.searchParams.get("secret");
+    const providedSecret = url.searchParams.get("secret");
 
-    if (
-      !process.env.TELEGRAM_SECRET ||
-      secret !== process.env.TELEGRAM_SECRET
-    ) {
+    if (secret && providedSecret !== secret) {
       return new Response(
         JSON.stringify({ ok: false, error: "Unauthorized" }),
         {
@@ -30,14 +26,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // Busca as ofertas da Shopee
+    // ✅ Buscar os produtos
     const shopeeResponse = await fetch(
       `${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         cache: "no-store",
       }
     );
@@ -67,57 +61,40 @@ export async function POST(req: Request) {
     console.log(`📦 Encontrados ${produtos.length} produtos.`);
     console.log(`📊 Último índice enviado: ${ultimoIndiceEnviado}`);
 
-    // Seleciona os próximos 5 produtos (rotaciona)
     const produtosParaEnviar = [];
     for (let i = 0; i < 20; i++) {
       const index = (ultimoIndiceEnviado + i) % produtos.length;
       produtosParaEnviar.push(produtos[index]);
     }
 
-    // Atualiza o índice para a próxima execução
     ultimoIndiceEnviado = (ultimoIndiceEnviado + 20) % produtos.length;
-
-    console.log(
-      `🔄 Enviando produtos ${ultimoIndiceEnviado - 20} a ${
-        ultimoIndiceEnviado - 1
-      }`
-    );
 
     let enviadosComSucesso = 0;
 
     for (const [index, produto] of produtosParaEnviar.entries()) {
       try {
-        // Converte preços para número
         const priceMax =
           typeof produto.priceMax === "string"
             ? parseFloat(produto.priceMax)
-            : typeof produto.priceMax === "number"
-            ? produto.priceMax
-            : 0;
+            : produto.priceMax || 0;
 
         const priceMin =
           typeof produto.priceMin === "string"
             ? parseFloat(produto.priceMin)
-            : typeof produto.priceMin === "number"
-            ? produto.priceMin
-            : 0;
+            : produto.priceMin || 0;
 
         const message = `
-        🔗 <a href="${produto.offerLink}">COMPRAR AGORA</a>
-        🛍️ <b>${produto.productName || "Produto sem nome"}</b>
-        ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
-        🔥 Por: <b>R$ ${priceMin.toFixed(2)}</b>
-        ⭐ Avaliação: ${produto.ratingStar || "0"} (${produto.sales || 0} vendas)
-
-     
-        `.trim();
+🔗 <a href="${produto.offerLink}">COMPRAR AGORA</a>
+🛍️ <b>${produto.productName || "Produto sem nome"}</b>
+${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
+🔥 Por: <b>R$ ${priceMin.toFixed(2)}</b>
+⭐ Avaliação: ${produto.ratingStar || "0"} (${produto.sales || 0} vendas)
+`.trim();
 
         await sendTelegramMessage(message);
         enviadosComSucesso++;
-
         console.log(`✅ Mensagem ${index + 1}/20 enviada`);
 
-        // Delay de 1 segundo entre mensagens
         if (index < 4) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
