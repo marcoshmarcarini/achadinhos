@@ -1,10 +1,27 @@
-import Image from "next/image"
+import Image from "next/image";
 
-export default function Footer(){
-    return(
-        <footer className={`flex items-center justify-center gap-2 py-[25px] absolute bottom-0 left-0 right-0`}>
-            <Image src={`/img/achadinhos.png`} width={25} height={25} alt={`Achadinhos`} />
-            <p>Desenvolvido por <a href="https://www.instagram.com/marcoshmarcarini" target="_blank">Marcos Henrique Marcarini Junior</a>. &copy; 2025</p>
-        </footer>
-    )
+export default function Footer() {
+  return (
+    <footer
+      className={`flex items-center justify-center gap-2 py-[25px] absolute bottom-0 left-0 right-0`}
+    >
+      <Image
+        src={`/img/achadinhos.png`}
+        width={20}
+        height={20}
+        alt={`Achadinhos`}
+      />
+      <p className={`text-[0.6rem] p-0 m-0`}>
+        Desenvolvido por
+        <a
+          href="https://www.instagram.com/marcoshmarcarini"
+          target="_blank"
+          className={`text-orange-500 hover:text-orange-300 transition-colors`}
+        >
+          Marcos Henrique Marcarini Junior
+        </a>
+        . &copy; 2025
+      </p>
+    </footer>
+  );
 }
