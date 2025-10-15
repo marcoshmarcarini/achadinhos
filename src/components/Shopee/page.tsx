@@ -36,11 +36,11 @@ export default function Shopee() {
         setProdutos(nodes);
 
         // 👉 Ordena por maior desconto e pega os 10 primeiros
-        const top10 = [...nodes]
+        const top20 = [...nodes]
           .sort((a, b) => b.priceDiscountRate - a.priceDiscountRate)
-          .slice(0, 10);
+          .slice(0, 20);
 
-        setTopProdutos(top10);
+        setTopProdutos(top20);
       }
     };
     fetchProducts();
