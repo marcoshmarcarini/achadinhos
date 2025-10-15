@@ -1,9 +1,28 @@
+"use client";
+import { useEffect, useState } from "react";
+
 import Image from "next/image";
 
 export default function Footer() {
+  const [display, setDisplay] = useState("flex");
+
+  const currentHeight = window.innerHeight;
+
+  useEffect(() => {
+    const handleDisplay = () => {
+      if (currentHeight > 2500) {
+        setDisplay("flex");
+      } else {
+        setDisplay("none");
+      }
+    };
+    handleDisplay();
+  }, [currentHeight]);
+
   return (
     <footer
-      className={`flex items-center justify-center gap-2 py-[25px] bottom-0 left-0 right-0`}
+      className={` items-center justify-center gap-2 py-[25px] bottom-0 left-0 right-0`}
+      style={{ display: display }}
     >
       <Image
         src={`/img/achadinhos.png`}
