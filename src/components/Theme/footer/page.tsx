@@ -4,20 +4,21 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function Footer() {
-  const [display, setDisplay] = useState("flex");
-
-  const currentHeight = window.innerHeight;
-
+  const [display, setDisplay] = useState("none");
+ const {innerHeight: height, innerWidth: width} = window
+ console.log(height, width)
+  
   useEffect(() => {
     const handleDisplay = () => {
-      if (currentHeight > 2500) {
+      const altura = height;
+      if (altura > 2500) {
         setDisplay("flex");
       } else {
         setDisplay("none");
       }
     };
     handleDisplay();
-  }, [currentHeight]);
+  }, []);
 
   return (
     <footer
