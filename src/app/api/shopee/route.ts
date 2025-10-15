@@ -5,8 +5,8 @@ export async function POST() {
     query: `
       query ProductOffer {
         productOfferV2(
-          listType: 0, 
-          sortType: 5,   
+          listType: 2, 
+          sortType: 20,   
           limit: 20,
           page: 1
         ) {
