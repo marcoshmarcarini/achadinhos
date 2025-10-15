@@ -1,6 +1,5 @@
 import { SHA256 } from "crypto-js";
 
-
 export async function POST() {
   const payload = {
     query: `
