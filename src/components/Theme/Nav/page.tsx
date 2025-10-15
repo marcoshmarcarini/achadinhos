@@ -1,6 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./Nav.module.css";
 import Login from "@/components/Admin/Login/page";
+
 
 export default function Nav() {
 
@@ -12,7 +14,9 @@ export default function Nav() {
 
   return (
     <nav className={styles.menu_principal}>
-      <div>NAVBRAND</div>
+      <div>
+        <Image src={`/img/achadinhos_mono.png`} width={50} height={50} alt={`Achadinhos`} />
+      </div>
       <div className={styles.menu_content}>
         <ul className={styles.menu_list}>
           <li className={styles.menu_item}>
