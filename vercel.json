@@ -22,8 +22,8 @@
   },
   "crons": [
     {
-      "path": "/api/send-telegram?secret=Xt5zDSbVilnpKVTuI5Xw9jkzS2Q9yoYb",
-      "schedule": "*/5 * * * *"
-    }
+    "path": "/api/send-telegram",
+    "schedule": "*/5 * * * *"
+  }
   ]
 }
