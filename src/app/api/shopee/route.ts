@@ -9,7 +9,7 @@ export async function POST() {
         productOfferV2(
           listType: 2,
           sortType: 20,
-          limit: 100,
+          limit: 50,
           page: 1
         ) {
           nodes {
