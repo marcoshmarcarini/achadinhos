@@ -3,7 +3,6 @@ import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; 
 
-// 1. Criamos um "molde" para o TypeScript parar de reclamar
 interface ShopeeProduct {
   offerLink?: string;
   productName?: string;
@@ -15,19 +14,19 @@ interface ShopeeProduct {
 
 async function processarEnvio(req: Request) {
   try {
-    // 2. VERIFICAÇÃO DE SEGURANÇA
+    // 1. VERIFICAÇÃO DE SEGURANÇA
     const secret = process.env.CRON_SECRET;
     const url = new URL(req.url);
     const providedSecret = url.searchParams.get("secret");
 
     if (secret && providedSecret !== secret) {
       return new Response(
-        JSON.stringify({ ok: false, error: "Unauthorized - Parâmetro secret incorreto ou ausente na URL" }),
+        JSON.stringify({ ok: false, error: "Unauthorized - Parâmetro secret incorreto" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // 3. BUSCA OFERTAS DA SHOPEE
+    // 2. BUSCA OFERTAS DA SHOPEE
     const shopeeResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -37,18 +36,40 @@ async function processarEnvio(req: Request) {
     if (!shopeeResponse.ok) throw new Error(`Erro ao buscar ofertas: ${shopeeResponse.status}`);
     
     const json = await shopeeResponse.json();
-    const produtos = json?.data?.data?.productOfferV2?.nodes || [];
+    const produtosGerais = json?.data?.data?.productOfferV2?.nodes || [];
 
-    if (!produtos.length) {
+    if (!produtosGerais.length) {
       return new Response(JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }), { status: 404 });
     }
 
-    // 4. SELEÇÃO DE 20 PRODUTOS (Embaralhado para não repetir)
-    const produtosEmbaralhados = produtos.sort(() => 0.5 - Math.random());
-    const produtosParaEnviar = produtosEmbaralhados.slice(0, 20);
+    // 3. FILTRO TECH EXCLUSIVO
+    const palavrasTech = [
+      "gamer", "mouse", "teclado", "headset", "monitor", "notebook", 
+      "ssd", "usb", "bluetooth", "fone", "xiaomi", "smartphone", 
+      "smartwatch", "carregador", "cabo", "rgb", "pc", "memória", 
+      "placa", "console", "controle", "lenovo", "samsung", "apple"
+    ];
+    
+    // Filtra produtos que tenham alguma das palavras-chave no nome
+    let produtosFiltrados = produtosGerais.filter((produto: ShopeeProduct) => {
+      if (!produto.productName) return false;
+      const nome = produto.productName.toLowerCase();
+      return palavrasTech.some(palavra => nome.includes(palavra));
+    });
 
-    // 5. DISPARO EM MASSA (PROMISE.ALL)
-    // Agora usamos a interface ShopeeProduct no lugar do "any"
+    // Rede de segurança: se a Shopee devolver menos de 5 itens tech nesta chamada, 
+    // usamos a lista mista original para o grupo não ficar sem ofertas hoje.
+    if (produtosFiltrados.length < 5) {
+      console.log("Poucas ofertas tech encontradas. Usando a lista geral.");
+      produtosFiltrados = produtosGerais;
+    }
+
+    // 4. SELEÇÃO E EMBARALHAMENTO
+    const produtosEmbaralhados = produtosFiltrados.sort(() => 0.5 - Math.random());
+    // Pega até 20 itens (se o filtro achou apenas 12, ele envia os 12)
+    const produtosParaEnviar = produtosEmbaralhados.slice(0, 20); 
+
+    // 5. DISPARO EM MASSA
     const promessasDeEnvio = produtosParaEnviar.map((produto: ShopeeProduct) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
@@ -75,7 +96,7 @@ ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
       JSON.stringify({
         ok: true,
         enviados: enviadosComSucesso,
-        message: `Disparo concluído: ${enviadosComSucesso}/20 mensagens entregues.`
+        message: `Disparo concluído: ${enviadosComSucesso} mensagens entregues.`
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
