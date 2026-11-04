@@ -53,7 +53,10 @@ async function processarEnvio(req: Request) {
       "lente", "projetor", "caixa de som", "soundbar", "dock station",
       "carregador portátil", "power bank", "case", "capinha", "película",
       "teclado mecânico", "mouse pad", "joystick", "gamepad", "placa de vídeo",
-      "placa mãe", "processador", "cooler", "ventoinha",
+      "placa mãe", "processador", "cooler", "ventoinha", "impressora", "escaner",
+      "impressora 3D", "kit gamer", "kit de ferramentas", "kit de limpeza", "kit de cabos",
+      "kit de acessórios", "kit de iluminação", "kit de montagem", "kit de refrigeração",
+      "kit de áudio", "kit de vídeo", "kit de rede", "kit de segurança", "kit de automação",
     ];
     
     // Filtra produtos que tenham alguma das palavras-chave no nome
