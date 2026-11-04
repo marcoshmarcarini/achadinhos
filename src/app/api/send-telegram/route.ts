@@ -47,7 +47,13 @@ async function processarEnvio(req: Request) {
       "gamer", "mouse", "teclado", "headset", "monitor", "notebook", 
       "ssd", "usb", "bluetooth", "fone", "xiaomi", "smartphone", 
       "smartwatch", "carregador", "cabo", "rgb", "pc", "memória", 
-      "placa", "console", "controle", "lenovo", "samsung", "apple"
+      "placa", "console", "controle", "lenovo", "samsung", "apple",
+      "headphone", "gamer", "placa", "led", "hub", "suporte", "adaptador",
+      "webcam", "microfone", "tablet", "impressora", "drone", "câmera",
+      "lente", "projetor", "caixa de som", "soundbar", "dock station",
+      "carregador portátil", "power bank", "case", "capinha", "película",
+      "teclado mecânico", "mouse pad", "joystick", "gamepad", "placa de vídeo",
+      "placa mãe", "processador", "cooler", "ventoinha",
     ];
     
     // Filtra produtos que tenham alguma das palavras-chave no nome

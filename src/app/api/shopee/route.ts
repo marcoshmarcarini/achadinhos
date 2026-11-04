@@ -10,7 +10,8 @@ export async function POST() {
           listType: 2,
           sortType: 20,
           limit: 50,
-          page: 1
+          page: 1,
+          page: 2
         ) {
           nodes {
             commissionRate
