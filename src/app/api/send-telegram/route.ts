@@ -3,6 +3,7 @@ import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; 
 
+// 1. Criamos um "molde" para o TypeScript parar de reclamar
 interface ShopeeProduct {
   offerLink?: string;
   productName?: string;
@@ -14,7 +15,7 @@ interface ShopeeProduct {
 
 async function processarEnvio(req: Request) {
   try {
-    // 1. VERIFICAÇÃO DE SEGURANÇA
+    // 2. VERIFICAÇÃO DE SEGURANÇA
     const secret = process.env.CRON_SECRET;
     const url = new URL(req.url);
     const providedSecret = url.searchParams.get("secret");
@@ -26,7 +27,7 @@ async function processarEnvio(req: Request) {
       );
     }
 
-    // 2. BUSCA OFERTAS DA SHOPEE
+    // 3. BUSCA OFERTAS DA SHOPEE
     const shopeeResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -42,12 +43,12 @@ async function processarEnvio(req: Request) {
       return new Response(JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }), { status: 404 });
     }
 
-    // 3. SELEÇÃO DE 20 PRODUTOS (Embaralhado para não repetir)
+    // 4. SELEÇÃO DE 20 PRODUTOS (Embaralhado para não repetir)
     const produtosEmbaralhados = produtos.sort(() => 0.5 - Math.random());
     const produtosParaEnviar = produtosEmbaralhados.slice(0, 20);
 
-    // 4. DISPARO EM MASSA (PROMISE.ALL)
-    // Adicionado o tipo ": any" no produto para o TypeScript não bloquear o build
+    // 5. DISPARO EM MASSA (PROMISE.ALL)
+    // Agora usamos a interface ShopeeProduct no lugar do "any"
     const promessasDeEnvio = produtosParaEnviar.map((produto: ShopeeProduct) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
