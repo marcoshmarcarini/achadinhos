@@ -1,14 +1,11 @@
 import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 
-// Variável em memória (Atenção: Na Vercel isso zera a cada execução fria, o ideal futuro é salvar num banco como Firebase)
-let ultimoIndiceEnviado = 0;
-
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; 
 
 async function processarEnvio(req: Request) {
   try {
-    // 1. VERIFICAÇÃO DE SEGURANÇA (Para testar, acesse: /api/send-telegram?secret=SUA_SENHA_DO_CRON)
+    // 1. VERIFICAÇÃO DE SEGURANÇA
     const secret = process.env.CRON_SECRET;
     const url = new URL(req.url);
     const providedSecret = url.searchParams.get("secret");
@@ -37,16 +34,12 @@ async function processarEnvio(req: Request) {
     }
 
     // 3. SELEÇÃO DE 20 PRODUTOS (Embaralhado para não repetir)
-    // Embaralha a lista completa de produtos aleatoriamente
     const produtosEmbaralhados = produtos.sort(() => 0.5 - Math.random());
-    
-    // Pega apenas os primeiros 20 da lista já embaralhada
     const produtosParaEnviar = produtosEmbaralhados.slice(0, 20);
 
-    // Removemos a lógica do 'ultimoIndiceEnviado' pois agora é aleatório!
-
-    // 4. DISPARO EM MASSA (PROMISE.ALL) - A Mágica para não dar Timeout na Vercel!
-    const promessasDeEnvio = produtosParaEnviar.map((produto) => {
+    // 4. DISPARO EM MASSA (PROMISE.ALL)
+    // Adicionado o tipo ": any" no produto para o TypeScript não bloquear o build
+    const promessasDeEnvio = produtosParaEnviar.map((produto: any) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
 
@@ -59,15 +52,14 @@ ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
 🔗 <a href="t.me/achadinhosshopeetops">CANAL DE OFERTAS</a>
 `.trim();
 
-      return sendTelegramMessage(message).catch(err => {
+      return sendTelegramMessage(message).catch((err) => {
         console.error("Erro em uma das mensagens:", err);
-        return null; // Retorna null para não quebrar o Promise.all inteiro
+        return null; 
       });
     });
 
-    // Aguarda todas as mensagens irem para o Telegram SIMULTANEAMENTE (Leva menos de 1 segundo)
     const resultados = await Promise.all(promessasDeEnvio);
-    const enviadosComSucesso = resultados.filter(r => r !== null).length;
+    const enviadosComSucesso = resultados.filter((r) => r !== null).length;
 
     return new Response(
       JSON.stringify({
