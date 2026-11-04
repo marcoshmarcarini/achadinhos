@@ -56,6 +56,7 @@ async function processarEnvio(req: Request) {
 ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
 🔥 Por: <b>R$ ${priceMin.toFixed(2)}</b>
 ⭐ Avaliação: ${produto.ratingStar || "0"} (${produto.sales || 0} vendas)
+🔗 <a href="t.me/achadinhosshopeetops">CANAL DE OFERTAS</a>
 `.trim();
 
       return sendTelegramMessage(message).catch(err => {
