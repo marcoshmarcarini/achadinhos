@@ -3,6 +3,15 @@ import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; 
 
+interface ShopeeProduct {
+  offerLink?: string;
+  productName?: string;
+  priceMax?: string | number;
+  priceMin?: string | number;
+  ratingStar?: string | number;
+  sales?: number | string;
+}
+
 async function processarEnvio(req: Request) {
   try {
     // 1. VERIFICAÇÃO DE SEGURANÇA
@@ -39,7 +48,7 @@ async function processarEnvio(req: Request) {
 
     // 4. DISPARO EM MASSA (PROMISE.ALL)
     // Adicionado o tipo ": any" no produto para o TypeScript não bloquear o build
-    const promessasDeEnvio = produtosParaEnviar.map((produto: any) => {
+    const promessasDeEnvio = produtosParaEnviar.map((produto: ShopeeProduct) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
 
