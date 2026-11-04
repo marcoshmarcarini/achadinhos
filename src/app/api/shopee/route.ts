@@ -6,11 +6,29 @@ export async function POST() {
   const payload = {
     query: `
       query ProductOffer {
-        productOfferV2(
+        page1: productOfferV2(
           listType: 2,
           sortType: 20,
           limit: 50,
-          page: 1,
+          page: 1
+        ) {
+          nodes {
+            commissionRate
+            imageUrl
+            itemId
+            priceDiscountRate          
+            priceMin
+            priceMax
+            productName
+            sales
+            ratingStar
+            offerLink
+          }
+        }
+        page2: productOfferV2(
+          listType: 2,
+          sortType: 20,
+          limit: 50,
           page: 2
         ) {
           nodes {
@@ -58,6 +76,21 @@ export async function POST() {
     return new Response(JSON.stringify({ error }), { status: res.status });
   }
 
-  const data = await res.json();
-  return Response.json({ data });
+  const rawData = await res.json();
+  
+  // 🔹 Juntamos as duas páginas numa lista única de 100 itens
+  const nodesPage1 = rawData?.data?.page1?.nodes || [];
+  const nodesPage2 = rawData?.data?.page2?.nodes || [];
+  const allNodes = [...nodesPage1, ...nodesPage2];
+
+  // 🔹 Recriamos a estrutura exata que o seu "send-telegram" e "top10" já esperam ler
+  const formattedData = {
+    data: {
+      productOfferV2: {
+        nodes: allNodes
+      }
+    }
+  };
+
+  return Response.json({ data: formattedData });
 }
