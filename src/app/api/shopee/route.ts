@@ -1,10 +1,24 @@
 import { SHA256 } from "crypto-js";
 
+export const dynamic = "force-dynamic"; // Impede a Vercel de fazer cache de chamadas antigas
+
 export async function POST() {
+  // 1. Sorteio de palavra-chave tech
+  const palavrasTech = [
+    "gamer", "teclado mecanico", "mouse sem fio", "headset", 
+    "monitor", "ssd", "xiaomi", "smartwatch", "fone bluetooth",
+    "alexa", "processador", "placa de video"
+  ];
+  
+  // Escolhe uma palavra aleatória da lista a cada execução
+  const palavraSorteada = palavrasTech[Math.floor(Math.random() * palavrasTech.length)];
+
+  // 2. Injetamos a palavraSorteada no parâmetro keyword do GraphQL
   const payload = {
     query: `
       query ProductOffer {
         productOfferV2(
+          keyword: "${palavraSorteada}",
           listType: 2, 
           sortType: 20,   
           limit: 20,
