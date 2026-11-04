@@ -36,17 +36,17 @@ async function processarEnvio(req: Request) {
       return new Response(JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }), { status: 404 });
     }
 
-    // 3. SELEÇÃO DE 20 PRODUTOS
-    const produtosParaEnviar = [];
-    for (let i = 0; i < 20; i++) {
-      const index = (ultimoIndiceEnviado + i) % produtos.length;
-      produtosParaEnviar.push(produtos[index]);
-    }
+    // 3. SELEÇÃO DE 20 PRODUTOS (Embaralhado para não repetir)
+    // Embaralha a lista completa de produtos aleatoriamente
+    const produtosEmbaralhados = produtos.sort(() => 0.5 - Math.random());
     
-    ultimoIndiceEnviado = (ultimoIndiceEnviado + 20) % produtos.length;
+    // Pega apenas os primeiros 20 da lista já embaralhada
+    const produtosParaEnviar = produtosEmbaralhados.slice(0, 20);
+
+    // Removemos a lógica do 'ultimoIndiceEnviado' pois agora é aleatório!
 
     // 4. DISPARO EM MASSA (PROMISE.ALL) - A Mágica para não dar Timeout na Vercel!
-    const promessasDeEnvio = produtosParaEnviar.map((produto) => {
+    const promessasDeEnvio = produtosParaEnviar.map((produto: any) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
 
