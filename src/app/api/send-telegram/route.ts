@@ -46,7 +46,7 @@ async function processarEnvio(req: Request) {
     // Removemos a lógica do 'ultimoIndiceEnviado' pois agora é aleatório!
 
     // 4. DISPARO EM MASSA (PROMISE.ALL) - A Mágica para não dar Timeout na Vercel!
-    const promessasDeEnvio = produtosParaEnviar.map((produto: any) => {
+    const promessasDeEnvio = produtosParaEnviar.map((produto) => {
       const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
       const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
 
