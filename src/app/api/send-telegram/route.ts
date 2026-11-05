@@ -1,7 +1,7 @@
 import { sendTelegramMessage } from "../../../../utils/sendTelegram";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30; 
+export const maxDuration = 30;
 
 interface ShopeeProduct {
   offerLink?: string;
@@ -21,69 +21,138 @@ async function processarEnvio(req: Request) {
 
     if (secret && providedSecret !== secret) {
       return new Response(
-        JSON.stringify({ ok: false, error: "Unauthorized - Parâmetro secret incorreto" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          ok: false,
+          error: "Unauthorized - Parâmetro secret incorreto",
+        }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
       );
     }
 
     // 2. BUSCA OFERTAS DA SHOPEE
-    const shopeeResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      cache: "no-store",
-    });
+    const shopeeResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/shopee`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+      },
+    );
 
-    if (!shopeeResponse.ok) throw new Error(`Erro ao buscar ofertas: ${shopeeResponse.status}`);
-    
+    if (!shopeeResponse.ok)
+      throw new Error(`Erro ao buscar ofertas: ${shopeeResponse.status}`);
+
     const json = await shopeeResponse.json();
     const produtosGerais = json?.data?.data?.productOfferV2?.nodes || [];
 
     if (!produtosGerais.length) {
-      return new Response(JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }), { status: 404 });
+      return new Response(
+        JSON.stringify({ ok: false, error: "Nenhum produto encontrado" }),
+        { status: 404 },
+      );
     }
 
-    // 3. FILTRO TECH EXCLUSIVO
+    // 3. FILTRO TECH EXCLUSIVO E PREMIUM
     const palavrasTech = [
-      "gamer", "mouse", "teclado", "headset", "monitor", "notebook", 
-      "ssd", "usb", "bluetooth", "fone", "xiaomi", "smartphone", 
-      "smartwatch", "carregador", "cabo", "rgb", "pc", "memória", 
-      "placa", "console", "controle", "lenovo", "samsung", "apple",
-      "headphone", "gamer", "placa", "led", "hub", "suporte", "adaptador",
-      "webcam", "microfone", "tablet", "impressora", "drone", "câmera",
-      "lente", "projetor", "caixa de som", "soundbar", "dock station",
-      "carregador portátil", "power bank", "case", "capinha", "película",
-      "teclado mecânico", "mouse pad", "joystick", "gamepad", "placa de vídeo",
-      "placa mãe", "processador", "cooler", "ventoinha", "impressora", "escaner",
-      "impressora 3D", "kit gamer", "kit de ferramentas", "kit de limpeza", "kit de cabos",
-      "kit de acessórios", "kit de iluminação", "kit de montagem", "kit de refrigeração",
-      "kit de áudio", "kit de vídeo", "kit de rede", "kit de segurança", "kit de automação",
+      "gamer",
+      "mouse",
+      "teclado",
+      "headset",
+      "monitor",
+      "notebook",
+      "ssd",
+      "bluetooth",
+      "fone",
+      "xiaomi",
+      "smartphone",
+      "smartwatch",
+      "rgb",
+      "pc",
+      "memória",
+      "placa de vídeo",
+      "console",
+      "controle",
+      "lenovo",
+      "samsung",
+      "apple",
+      "nintendo",
+      "playstation",
+      "ryzen",
+      "intel",
+      "corsair",
+      "logitech",
     ];
-    
-    // Filtra produtos que tenham alguma das palavras-chave no nome
+
+    const palavrasProibidas = [
+      "caneca",
+      "garrafa",
+      "liquidificador",
+      "capinha",
+      "película",
+      "cabo",
+      "meia",
+      "cueca",
+      "suporte",
+      "tripé",
+      "luminária",
+    ];
+
     let produtosFiltrados = produtosGerais.filter((produto: ShopeeProduct) => {
       if (!produto.productName) return false;
+
+      // 1. Filtro de Preço Mínimo (Mata 90% dos produtos genéricos baratos)
+      const priceMin =
+        typeof produto.priceMin === "string"
+          ? parseFloat(produto.priceMin)
+          : produto.priceMin || 0;
+      if (priceMin < 80) return false;
+
       const nome = produto.productName.toLowerCase();
-      return palavrasTech.some(palavra => nome.includes(palavra));
+
+      // 2. Filtro de Palavras Negativas
+      const temPalavraProibida = palavrasProibidas.some((palavra) =>
+        nome.includes(palavra),
+      );
+      if (temPalavraProibida) return false;
+
+      // 3. Filtro de Palavras Tech
+      return palavrasTech.some((palavra) => nome.includes(palavra));
     });
 
-    // Rede de segurança: se a Shopee devolver menos de 5 itens tech nesta chamada, 
-    // usamos a lista mista original para o grupo não ficar sem ofertas hoje.
+    // Se o filtro super restrito achar pouca coisa, baixamos a guarda mas mantemos o preço
     if (produtosFiltrados.length < 5) {
-      console.log("Poucas ofertas tech encontradas. Usando a lista geral.");
-      produtosFiltrados = produtosGerais;
+      console.log(
+        "Poucas ofertas tech premium. Pegando produtos gerais acima de R$80.",
+      );
+      produtosFiltrados = produtosGerais.filter((produto: ShopeeProduct) => {
+        const priceMin =
+          typeof produto.priceMin === "string"
+            ? parseFloat(produto.priceMin)
+            : produto.priceMin || 0;
+        return priceMin >= 80;
+      });
     }
 
     // 4. SELEÇÃO E EMBARALHAMENTO
-    const produtosEmbaralhados = produtosFiltrados.sort(() => 0.5 - Math.random());
+    const produtosEmbaralhados = produtosFiltrados.sort(
+      () => 0.5 - Math.random(),
+    );
     // Pega até 20 itens (se o filtro achou apenas 12, ele envia os 12)
-    const produtosParaEnviar = produtosEmbaralhados.slice(0, 20); 
+    const produtosParaEnviar = produtosEmbaralhados.slice(0, 20);
 
     // 5. DISPARO EM MASSA
-    const promessasDeEnvio = produtosParaEnviar.map((produto: ShopeeProduct) => {
-      const priceMax = typeof produto.priceMax === "string" ? parseFloat(produto.priceMax) : produto.priceMax || 0;
-      const priceMin = typeof produto.priceMin === "string" ? parseFloat(produto.priceMin) : produto.priceMin || 0;
+    const promessasDeEnvio = produtosParaEnviar.map(
+      (produto: ShopeeProduct) => {
+        const priceMax =
+          typeof produto.priceMax === "string"
+            ? parseFloat(produto.priceMax)
+            : produto.priceMax || 0;
+        const priceMin =
+          typeof produto.priceMin === "string"
+            ? parseFloat(produto.priceMin)
+            : produto.priceMin || 0;
 
-      const message = `
+        const message = `
 🔗 <a href="${produto.offerLink}">COMPRAR AGORA</a>
 🛍️ <b>${produto.productName || "Produto sem nome"}</b>
 ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
@@ -92,11 +161,12 @@ ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
 🔗 <a href="t.me/achadinhosshopeetops">CANAL DE OFERTAS</a>
 `.trim();
 
-      return sendTelegramMessage(message).catch((err) => {
-        console.error("Erro em uma das mensagens:", err);
-        return null; 
-      });
-    });
+        return sendTelegramMessage(message).catch((err) => {
+          console.error("Erro em uma das mensagens:", err);
+          return null;
+        });
+      },
+    );
 
     const resultados = await Promise.all(promessasDeEnvio);
     const enviadosComSucesso = resultados.filter((r) => r !== null).length;
@@ -105,18 +175,24 @@ ${priceMax == priceMin ? "" : `💸 De: R$ ${priceMax.toFixed(2)}`}
       JSON.stringify({
         ok: true,
         enviados: enviadosComSucesso,
-        message: `Disparo concluído: ${enviadosComSucesso} mensagens entregues.`
+        message: `Disparo concluído: ${enviadosComSucesso} mensagens entregues.`,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
-
   } catch (error: unknown) {
     return new Response(
-      JSON.stringify({ ok: false, error: error instanceof Error ? error.message : "Erro desconhecido" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({
+        ok: false,
+        error: error instanceof Error ? error.message : "Erro desconhecido",
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 }
 
-export async function GET(req: Request) { return processarEnvio(req); }
-export async function POST(req: Request) { return processarEnvio(req); }
+export async function GET(req: Request) {
+  return processarEnvio(req);
+}
+export async function POST(req: Request) {
+  return processarEnvio(req);
+}
